@@ -83,10 +83,10 @@ const disputeGrid = agGrid.createGrid($('#disputes-grid'), {
       } },
     { headerName: 'Reason', field: 'reason', flex: 1, minWidth: 150, valueFormatter: (p) => REASONS[p.value] || p.value },
     { headerName: 'Amount', field: 'amount', width: 110, type: 'rightAligned', valueFormatter: (p) => money(p.value, p.data.currency) },
-    { headerName: 'Buyer', field: 'buyer', width: 140 },
-    { headerName: 'Item', field: 'item', flex: 1, minWidth: 170 },
+    { headerName: 'Agent says', field: 'recommendation', width: 200, cellStyle: { paddingLeft: '24px' }, headerStyle: { paddingLeft: '24px' }, cellRenderer: (p) => (p.value ? pill(REC[p.value].label, REC[p.value].cls) : '<span class="muted">Not run</span>') },
     { headerName: 'Evidence', field: 'completeness', width: 110, valueFormatter: (p) => (p.value === null ? '—' : `${p.value}%`) },
-    { headerName: 'Agent says', field: 'recommendation', width: 190, cellRenderer: (p) => (p.value ? pill(REC[p.value].label, REC[p.value].cls) : '<span class="muted">Not run</span>') },
+    { headerName: 'Item', field: 'item', width: 190 },
+    { headerName: 'Buyer', field: 'buyer', width: 140 },
     { headerName: 'Status', field: 'status', width: 170, valueFormatter: (p) => STATUS[p.value] || p.value },
   ],
   defaultColDef: { sortable: true, resizable: true },
@@ -111,6 +111,34 @@ const orderGrid = agGrid.createGrid($('#orders-grid'), {
   defaultColDef: { sortable: true, resizable: true },
   onRowClicked: (e) => openOrder(e.data.order_id),
 });
+
+// ---------- responsive tables ----------
+// On narrow screens show only the columns needed to decide; the rest stays in the detail panel.
+const narrow = window.matchMedia('(max-width: 720px)');
+const NARROW_HIDDEN = {
+  disputes: ['buyer', 'item', 'completeness', 'recommendation', 'status'],
+  orders: ['order_id', 'buyer', 'paid_days_ago', 'issues'],
+};
+const WIDTHS = {
+  disputes: { narrow: { daysLeft: 92, amount: 92 }, wide: { daysLeft: 120, amount: 110 } },
+  orders: { narrow: { risk: 100, amount: 88 }, wide: { risk: 110, amount: 110 } },
+};
+function setWidths(grid, widths) {
+  grid.applyColumnState({ state: Object.entries(widths).map(([colId, width]) => ({ colId, width })) });
+}
+function fitColumns() {
+  const n = narrow.matches;
+  disputeGrid.setColumnsVisible(NARROW_HIDDEN.disputes, !n);
+  orderGrid.setColumnsVisible(NARROW_HIDDEN.orders, !n);
+  setWidths(disputeGrid, WIDTHS.disputes[n ? 'narrow' : 'wide']);
+  setWidths(orderGrid, WIDTHS.orders[n ? 'narrow' : 'wide']);
+}
+narrow.addEventListener('change', fitColumns);
+fitColumns();
+
+function revealOnPhone(sel) {
+  if (narrow.matches) $(sel).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 // ---------- disputes ----------
 async function loadDisputes() {
@@ -141,6 +169,8 @@ async function openDispute(id) {
   try {
     const data = await api(`/api/disputes/${encodeURIComponent(id)}`);
     renderDispute(data);
+    if (state.lastOpened !== id) revealOnPhone('#detail');
+    state.lastOpened = id;
   } catch (err) { panel.innerHTML = `<p class="muted">${esc(err.message)}</p>`; }
 }
 
@@ -340,6 +370,8 @@ function openOrder(id) {
         <button class="btn primary" type="submit">Add tracking</button>
       </form>
     </div>`;
+  if (state.lastOrder !== o.order_id) revealOnPhone('#order-detail');
+  state.lastOrder = o.order_id;
   $('#track-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
