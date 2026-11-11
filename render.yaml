@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: neutronova-disputes
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    envVars:
+      - key: PAYPAL_MODE
+        value: mock
+      - key: NODE_VERSION
+        value: "22"

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neutronova Disputes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+    </span>
+    <span id="app-name">Neutronova Disputes</span>
+  </div>
+  <div class="modes" id="modes" aria-live="polite"></div>
+  <nav class="tabs" aria-label="Sections">
+    <button class="tab" data-view="disputes" aria-current="page">Defend</button>
+    <button class="tab" data-view="prevent">Prevent</button>
+    <button class="tab" data-view="metrics">Metrics</button>
+  </nav>
+</header>
+
+<main>
+  <section id="view-disputes" class="view">
+    <div class="kpis" id="kpis"></div>
+    <div class="toolbar">
+      <h1>Disputes</h1>
+      <div class="toolbar-actions">
+        <button class="btn ghost" id="btn-refresh">Refresh</button>
+        <button class="btn ghost" id="btn-simulate" hidden>Simulate new dispute (webhook)</button>
+        <button class="btn ghost" id="btn-reset" hidden>Reset demo</button>
+      </div>
+    </div>
+    <div class="split">
+      <div class="grid-wrap"><div id="disputes-grid" class="grid"></div></div>
+      <aside class="panel" id="detail" aria-live="polite">
+        <div class="empty">
+          <p class="empty-title">Pick a dispute</p>
+          <p>The agent reads it with the PayPal Agent Toolkit, checks the evidence and drafts a response. Nothing is sent until you approve.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="view-prevent" class="view" hidden>
+    <div class="toolbar">
+      <h1>Check orders before you ship</h1>
+      <p class="muted" id="orders-note"></p>
+    </div>
+    <div class="split">
+      <div class="grid-wrap"><div id="orders-grid" class="grid"></div></div>
+      <aside class="panel" id="order-detail" aria-live="polite">
+        <div class="empty">
+          <p class="empty-title">Pick an order</p>
+          <p>Most lost disputes start before shipping: a bad address, no tracking, no photos. Fix them while it is still cheap.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="view-metrics" class="view" hidden>
+    <div class="toolbar"><h1>Measured in this demo</h1></div>
+    <p class="muted narrow">Only numbers measured here. Time a manual response yourself, then run the agent on the same dispute to compare.</p>
+    <div class="kpis" id="metrics-kpis"></div>
+    <div class="card narrow">
+      <h2>Time a manual response</h2>
+      <p class="muted">Start the timer, gather the evidence and write the response the way you do today, then stop.</p>
+      <div class="row">
+        <label for="trial-dispute">Dispute</label>
+        <select id="trial-dispute"></select>
+      </div>
+      <div class="row">
+        <span class="timer" id="trial-timer" aria-live="off">00:00</span>
+        <button class="btn primary" id="trial-start">Start timer</button>
+        <button class="btn" id="trial-stop" disabled>Stop and save</button>
+      </div>
+      <p class="muted small" id="trial-msg" role="status"></p>
+    </div>
+    <div class="card narrow">
+      <h2>Responses sent</h2>
+      <div id="audit"></div>
+    </div>
+    <p class="muted small narrow">Context from published research (card chargebacks, not PayPal): US merchants who fight a dispute with evidence win about 54% of the time but win about 8% of all disputes. Source: Mastercard and Datos Insights, via Chargeback.io.</p>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="/vendor/ag-grid/ag-grid-community.min.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
